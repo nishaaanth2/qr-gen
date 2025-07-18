@@ -1,17 +1,11 @@
-import { kv } from '@vercel/kv';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Body from '@/components/Body';
 
 async function getAllKv(id: string) {
-  const data = await kv.hgetall<{
-    prompt: string;
-    image?: string;
-    website_url?: string;
-    model_latency?: string;
-  }>(id);
-
-  return data;
+  // Placeholder function to fetch data
+  // This should be replaced with an actual data fetching mechanism
+  return null;
 }
 
 export async function generateMetadata({
@@ -27,8 +21,8 @@ export async function generateMetadata({
   }
 
   const title = `QrGPT: ${data.prompt}`;
-  const description = `A QR code generated from qrGPT.io linking to: ${data.website_url}`;
-  const image = data.image || 'https://qrGPT.io/og-image.png';
+  const description = `A QR code generated from qrGPT.io linking to: ${data.url}`;
+  const image = data.image_url || 'https://qrGPT.io/og-image.png';
 
   return {
     title,
@@ -65,10 +59,10 @@ export default async function Results({
   }
   return (
     <Body
-      prompt={data.prompt}
-      imageUrl={data.image}
-      redirectUrl={data.website_url}
-      modelLatency={Number(data.model_latency)}
+      prompt={data?.prompt}
+      imageUrl={data?.image_url}
+      redirectUrl={data?.url}
+      modelLatency={data?.model_latency_ms ? Number(data.model_latency_ms) : undefined}
       id={params.id}
     />
   );

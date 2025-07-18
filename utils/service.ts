@@ -3,22 +3,6 @@ export interface QrGenerateRequest {
    * URL that the QR code will point to.
    */
   url: string;
-
-  /**
-   * Accompanying text prompt that will decide the style or theme of the code.
-   */
-  prompt: string;
-
-  /**
-   * Conditioning scale for qr controlnet
-   */
-  qr_conditioning_scale?: number;
-
-  /**
-   * Steps to run denoising
-   */
-
-  num_inference_steps?: number;
 }
 
 export interface QrGenerateResponse {

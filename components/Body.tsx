@@ -12,139 +12,86 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useCallback, useEffect, useState } from 'react';
-import { QrGenerateRequest, QrGenerateResponse } from '@/utils/service';
-import { QrCard } from '@/components/QrCard';
-import { AlertCircle } from 'lucide-react';
+import { useCallback, useState, useEffect } from 'react';
+import { AlertCircle, Check, CheckCircle, X } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import LoadingDots from '@/components/ui/loadingdots';
 import downloadQrCode from '@/utils/downloadQrCode';
-import va from '@vercel/analytics';
-import { PromptSuggestion } from '@/components/PromptSuggestion';
-import { useRouter } from 'next/navigation';
 import { toast, Toaster } from 'react-hot-toast';
-
-const promptSuggestions = [
-  'A city view with clouds',
-  'A beautiful glacier',
-  'A forest overlooking a mountain',
-  'A saharan desert',
-];
+import { QRCode } from 'qrcode.react';
+import Image from 'next/image';
+import QRCodeGenerator from './qrgenrator';
+import { AttributeSelector } from '@/components/attribute-selector';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ColorTabs from '@/components/color-selector';
 
 const generateFormSchema = z.object({
-  url: z.string().min(1),
-  prompt: z.string().min(3).max(160),
+  url: z.string().min(1, 'URL is required').url('Please enter a valid URL'),
 });
 
 type GenerateFormValues = z.infer<typeof generateFormSchema>;
 
-const Body = ({
-  imageUrl,
-  prompt,
-  redirectUrl,
-  modelLatency,
-  id,
-}: {
-  imageUrl?: string;
-  prompt?: string;
-  redirectUrl?: string;
-  modelLatency?: number;
-  id?: string;
-}) => {
+const Body = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [response, setResponse] = useState<QrGenerateResponse | null>(null);
-  const [submittedURL, setSubmittedURL] = useState<string | null>(null);
-
-  const router = useRouter();
+  const [qrUrl, setQrUrl] = useState<string>("https://qr.nishaanth.com");
+  const [qrSize, setQrSize] = useState<number>(256);
+  const [qrPadding, setQrPadding] = useState<number>(10);
+  const [qrColor, setQrColor] = useState<string>('#000000');
+  const [logoAspectRatio, setLogoAspectRatio] = useState<number>(1);
+  const [qrBackgroundColor, setQrBackgroundColor] = useState<string>('#ffffff');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const form = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
     mode: 'onChange',
-
-    // Set default values so that the form inputs are controlled components.
     defaultValues: {
-      url: '',
-      prompt: '',
+      url: 'https://qr.nishaanth.com',
     },
   });
 
   useEffect(() => {
-    if (imageUrl && prompt && redirectUrl && modelLatency && id) {
-      setResponse({
-        image_url: imageUrl,
-        model_latency_ms: modelLatency,
-        id: id,
-      });
-      setSubmittedURL(redirectUrl);
-
-      form.setValue('prompt', prompt);
-      form.setValue('url', redirectUrl);
-    }
-  }, [imageUrl, modelLatency, prompt, redirectUrl, id, form]);
-
-  const handleSuggestionClick = useCallback(
-    (suggestion: string) => {
-      form.setValue('prompt', suggestion);
-    },
-    [form],
-  );
-
-  const handleSubmit = useCallback(
-    async (values: GenerateFormValues) => {
-      setIsLoading(true);
-      setResponse(null);
-      setSubmittedURL(values.url);
-
-      try {
-        const request: QrGenerateRequest = {
-          url: values.url,
-          prompt: values.prompt,
-        };
-        const response = await fetch('/api/generate', {
-          method: 'POST',
-          body: JSON.stringify(request),
-        });
-
-        // Handle API errors.
-        if (!response.ok || response.status !== 200) {
-          const text = await response.text();
-          throw new Error(
-            `Failed to generate QR code: ${response.status}, ${text}`,
-          );
-        }
-
-        const data = await response.json();
-
-        va.track('Generated QR Code', {
-          prompt: values.prompt,
-        });
-
-        router.push(`/start/${data.id}`);
-      } catch (error) {
-        va.track('Failed to generate', {
-          prompt: values.prompt,
-        });
-        if (error instanceof Error) {
-          setError(error);
-        }
-      } finally {
-        setIsLoading(false);
+    const subscription = form.watch((value) => {
+      if (value.url) {
+        setQrUrl(value.url);
       }
-    },
-    [router],
-  );
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImage(e.target?.result as string);
+        setLogoAspectRatio(file.size);
+        console.log(file.size);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    // setUploadedImage(null);
+    // after remove, cant able to upload the same image again
+    const input = document.getElementById('image-upload') as HTMLInputElement;
+    if (input) {
+      input.value = '';
+    }
+    setUploadedImage(null);
+  };
 
   return (
     <div className="flex justify-center items-center flex-col w-full lg:p-0 p-4 sm:mb-28 mb-0">
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 mt-10">
         <div className="col-span-1">
-          <h1 className="text-3xl font-bold mb-10">Generate a QR Code</h1>
+          <h1 className="text-4xl font-bold mb-10 ">Generate a QR Code</h1>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <form>
               <div className="flex flex-col gap-4">
                 <FormField
                   control={form.control}
@@ -153,7 +100,7 @@ const Body = ({
                     <FormItem>
                       <FormLabel>URL</FormLabel>
                       <FormControl>
-                        <Input placeholder="roomgpt.io" {...field} />
+                        <Input placeholder="https://your-url.com"  {...field} />
                       </FormControl>
                       <FormDescription>
                         This is what your QR code will link to.
@@ -162,54 +109,61 @@ const Body = ({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="prompt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prompt</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="A city view with clouds"
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription className="">
-                        This is what the image in your QR code will look like.
-                      </FormDescription>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <AttributeSelector 
+                  defaultValue={[qrSize]} 
+                  maxValue={2000} 
+                  label="Size" 
+                  hoverText="Controls the size of the QR code." 
+                  allowMore={true} 
+                  onChange={(value) => setQrSize(value[0])}
                 />
-                <div className="my-2">
-                  <p className="text-sm font-medium mb-3">Prompt suggestions</p>
-                  <div className="grid sm:grid-cols-2 grid-cols-1 gap-3 text-center text-gray-500 text-sm">
-                    {promptSuggestions.map((suggestion) => (
-                      <PromptSuggestion
-                        key={suggestion}
-                        suggestion={suggestion}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        isLoading={isLoading}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="inline-flex justify-center
-                 max-w-[200px] mx-auto w-full"
-                >
-                  {isLoading ? (
-                    <LoadingDots color="white" />
-                  ) : response ? (
-                    '✨ Regenerate'
-                  ) : (
-                    'Generate'
+                <AttributeSelector 
+                  defaultValue={[qrPadding]} 
+                  maxValue={100} 
+                  label="Padding" 
+                  hoverText="Controls the padding around the QR code." 
+                  allowMore={true} 
+                  onChange={(value) => setQrPadding(value[0])}
+                />
+                <ColorTabs 
+                  title="QR Color" 
+                  hoverText="Choose the color for the QR code blocks. This will determine
+          the color of the scannable pattern in your QR code." 
+                  onChange={(color) => setQrColor(color)}
+                />
+                <ColorTabs 
+                  title="Background Color" 
+                  hoverText="Choose the color for the QR code background. This will determine
+          the color of the background of your QR code." 
+                  onChange={(color) => setQrBackgroundColor(color)}
+                />
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="image-upload" className="text-sm font-medium">
+                    Upload Logo (optional)
+                  </label>
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="text-sm"
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="image-upload" className="w-fit py-2 text-sm  rounded-md px-3 cursor-pointer border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                    Choose Logo
+                  </label>
+                  {uploadedImage && (
+                    <div className="mt-2">
+                      <p className="text-sm mb-1">Current Logo:</p>
+                      <div className="w-10 h-10 relative border border-gray-400  mt-2">
+                        <img src={uploadedImage} alt="Uploaded logo" className="w-full h-full object-contain" />
+                        <div className="absolute w-5 h-5 top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-red-600 flex justify-center items-center rounded-full">
+                          <X className="w-3 h-3 text-white" onClick={handleRemoveImage} />
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </Button>
+                </div>
 
                 {error && (
                   <Alert variant="destructive">
@@ -222,47 +176,55 @@ const Body = ({
             </form>
           </Form>
         </div>
-        <div className="col-span-1">
-          {submittedURL && (
-            <>
-              <h1 className="text-3xl font-bold sm:mb-5 mb-5 mt-5 sm:mt-0 sm:text-center text-left">
-                Your QR Code
+        <div className="col-span-1 ">
+          {qrUrl && (
+            <div className="">
+              <h1 className="text-3xl font-bold sm:mb-5 mb-5 mt-5 sm:mt-0 text-center">
+                Your QR Code 
+                
+                <HoverCard>
+                  <HoverCardTrigger><CheckCircle className="inline-block h-5 w-5 my-auto text-green-500 mx-2" /></HoverCardTrigger>
+                  <HoverCardContent className="text-sm font-normal mx-1   ">Your QR Has Been Verified</HoverCardContent>
+                </HoverCard>
               </h1>
               <div>
-                <div className="flex flex-col justify-center relative h-auto items-center">
-                  {response ? (
-                    <QrCard
-                      imageURL={response.image_url}
-                      time={(response.model_latency_ms / 1000).toFixed(2)}
+                <div className='w-full aspect-square bg-gray-100'>
+                  <div className="w-full h-full flex justify-center items-center overflow-auto">
+                    <QRCodeGenerator
+                      text={qrUrl}
+                      size={qrSize}
+                      padding={qrPadding}
+                      qrColor={qrColor}
+                      backgroundColor={qrBackgroundColor}
+                      logoUrl={uploadedImage ?? undefined}
+                      logoAspectRatio={logoAspectRatio}
                     />
-                  ) : (
-                    <div className="relative flex flex-col justify-center items-center gap-y-2 w-[510px] border border-gray-300 rounded shadow group p-2 mx-auto animate-pulse bg-gray-400 aspect-square max-w-full" />
-                  )}
-                </div>
-                {response && (
-                  <div className="flex justify-center gap-5 mt-4">
-                    <Button
-                      onClick={() =>
-                        downloadQrCode(response.image_url, 'qrCode')
-                      }
-                    >
-                      Download
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `https://qrgpt.io/start/${id || ''}`,
-                        );
-                        toast.success('Link copied to clipboard');
-                      }}
-                    >
-                      ✂️ Share
-                    </Button>
                   </div>
-                )}
+                </div>
+                <div className="flex justify-center gap-5 mt-4">
+                  <Button
+                    onClick={() => {
+                      const canvas = document.querySelector('canvas');
+                      if (canvas) {
+                        const pngUrl = canvas.toDataURL('image/png');
+                        downloadQrCode(pngUrl, 'qrCode');
+                      }
+                    }}
+                  >
+                    Download
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(qrUrl);
+                      toast.success('Link copied to clipboard');
+                    }}
+                  >
+                    ✂️ Share
+                  </Button>
+                </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

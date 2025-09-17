@@ -14,18 +14,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useCallback, useState, useEffect } from 'react';
-import { AlertCircle, Check, CheckCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { AlertCircle, CheckCircle, X } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import LoadingDots from '@/components/ui/loadingdots';
 import downloadQrCode from '@/utils/downloadQrCode';
 import { toast, Toaster } from 'react-hot-toast';
-import { QRCode } from 'qrcode.react';
-import Image from 'next/image';
 import QRCodeGenerator from './qrgenrator';
+import Image from 'next/image';
 import { AttributeSelector } from '@/components/attribute-selector';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ColorTabs from '@/components/color-selector';
 
 const generateFormSchema = z.object({
@@ -35,8 +32,7 @@ const generateFormSchema = z.object({
 type GenerateFormValues = z.infer<typeof generateFormSchema>;
 
 const Body = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error] = useState<Error | null>(null);
   const [qrUrl, setQrUrl] = useState<string>("https://qr.nishaanth.com");
   const [qrSize, setQrSize] = useState<number>(256);
   const [qrPadding, setQrPadding] = useState<number>(10);
@@ -156,7 +152,7 @@ const Body = () => {
                     <div className="mt-2">
                       <p className="text-sm mb-1">Current Logo:</p>
                       <div className="w-10 h-10 relative border border-gray-400  mt-2">
-                        <img src={uploadedImage} alt="Uploaded logo" className="w-full h-full object-contain" />
+                        <Image src={uploadedImage} alt="Uploaded logo" fill className="object-contain" />
                         <div className="absolute w-5 h-5 top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-red-600 flex justify-center items-center rounded-full">
                           <X className="w-3 h-3 text-white" onClick={handleRemoveImage} />
                         </div>

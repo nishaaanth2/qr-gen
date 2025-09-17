@@ -15,12 +15,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, X } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import downloadQrCode from '@/utils/downloadQrCode';
 import { toast, Toaster } from 'react-hot-toast';
 import QRCodeGenerator from './qrgenrator';
-import Image from 'next/image';
 import { AttributeSelector } from '@/components/attribute-selector';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import ColorTabs from '@/components/color-selector';
@@ -37,9 +36,7 @@ const Body = () => {
   const [qrSize, setQrSize] = useState<number>(256);
   const [qrPadding, setQrPadding] = useState<number>(10);
   const [qrColor, setQrColor] = useState<string>('#000000');
-  const [logoAspectRatio, setLogoAspectRatio] = useState<number>(1);
   const [qrBackgroundColor, setQrBackgroundColor] = useState<string>('#ffffff');
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const form = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
@@ -58,28 +55,7 @@ const Body = () => {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string);
-        setLogoAspectRatio(file.size);
-        console.log(file.size);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveImage = () => {
-    // setUploadedImage(null);
-    // after remove, cant able to upload the same image again
-    const input = document.getElementById('image-upload') as HTMLInputElement;
-    if (input) {
-      input.value = '';
-    }
-    setUploadedImage(null);
-  };
+  
 
   return (
     <div className="flex justify-center items-center flex-col w-full lg:p-0 p-4 sm:mb-28 mb-0">
@@ -133,33 +109,7 @@ const Body = () => {
           the color of the background of your QR code." 
                   onChange={(color) => setQrBackgroundColor(color)}
                 />
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="image-upload" className="text-sm font-medium">
-                    Upload Logo (optional)
-                  </label>
-                  <input
-                    type="file"
-                    id="image-upload"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="text-sm"
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor="image-upload" className="w-fit py-2 text-sm  rounded-md px-3 cursor-pointer border border-input bg-background hover:bg-accent hover:text-accent-foreground">
-                    Choose Logo
-                  </label>
-                  {uploadedImage && (
-                    <div className="mt-2">
-                      <p className="text-sm mb-1">Current Logo:</p>
-                      <div className="w-10 h-10 relative border border-gray-400  mt-2">
-                        <Image src={uploadedImage} alt="Uploaded logo" fill className="object-contain" />
-                        <div className="absolute w-5 h-5 top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-red-600 flex justify-center items-center rounded-full">
-                          <X className="w-3 h-3 text-white" onClick={handleRemoveImage} />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                
 
                 {error && (
                   <Alert variant="destructive">
@@ -192,8 +142,6 @@ const Body = () => {
                       padding={qrPadding}
                       qrColor={qrColor}
                       backgroundColor={qrBackgroundColor}
-                      logoUrl={uploadedImage ?? undefined}
-                      logoAspectRatio={logoAspectRatio}
                     />
                   </div>
                 </div>

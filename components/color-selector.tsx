@@ -1,12 +1,13 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 
 interface ColorTabsProps {
   title: string;
   hoverText: string;
-  onChange: (color: string) => void;
+  // eslint-disable-next-line no-unused-vars
+  onChange(color: string): void;
 }
 
 const ColorTabs: React.FC<ColorTabsProps> = ({ title, hoverText, onChange }) => {

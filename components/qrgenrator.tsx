@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
-import { decodeQRCode, verifyQR } from '@/utils/verifyqr';
+import { decodeQRCode } from '@/utils/verifyqr';
 
 interface QRCodeGeneratorProps {
   text: string;
@@ -14,17 +16,15 @@ interface QRCodeGeneratorProps {
   qrColor?: string;
 }
 
-const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
-  text,
-  logoUrl,
-  logoAspectRatio,
-  logoPadding = 10,
-  logoBackgroundColor = 'transparent',
-  size = 256,
-  padding = 10,
-  backgroundColor = '#FFFFFF',
-  qrColor = '#000000',
-}) => {
+const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = (props) => {
+  const {
+    text,
+    logoUrl,
+    size = 256,
+    padding = 10,
+    backgroundColor = '#FFFFFF',
+    qrColor = '#000000',
+  } = props;
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
             let logoSize = size / logoDivider;
             const x = (canvas.width - logoSize) / 2;
             const y = (canvas.height - logoSize) / 2;
-            ctx?.drawImage(img, x, y, logoSize,auto);
+            ctx?.drawImage(img, x, y, logoSize, logoSize);
 
             const data = await decodeQRCode(canvas.toDataURL());
             if (data === text) {

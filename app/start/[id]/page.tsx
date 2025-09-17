@@ -2,9 +2,17 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Body from '@/components/Body';
 
-async function getAllKv(id: string) {
+type KVData = {
+  prompt: string;
+  url: string;
+  image_url?: string;
+  model_latency_ms?: number | string;
+};
+
+async function getAllKv(_id: string): Promise<KVData | null> {
   // Placeholder function to fetch data
   // This should be replaced with an actual data fetching mechanism
+  void _id;
   return null;
 }
 
@@ -57,13 +65,5 @@ export default async function Results({
   if (!data) {
     notFound();
   }
-  return (
-    <Body
-      prompt={data?.prompt}
-      imageUrl={data?.image_url}
-      redirectUrl={data?.url}
-      modelLatency={data?.model_latency_ms ? Number(data.model_latency_ms) : undefined}
-      id={params.id}
-    />
-  );
+  return <Body />;
 }

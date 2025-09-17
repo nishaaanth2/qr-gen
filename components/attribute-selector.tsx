@@ -18,7 +18,8 @@ interface AttributeSelectorProps {
   label: string
   hoverText: string
   allowMore?: boolean
-  onChange?: (value: number[]) => void
+  // eslint-disable-next-line no-unused-vars
+  onChange?(value: number[]): void
 }
 
 export function AttributeSelector({

@@ -13,20 +13,20 @@ let description = 'Generate your AI QR Code in seconds';
 let url = 'https://www.qrgpt.io';
 let ogimage = [
   {
-    url: "https://dminhvu.com/images/home/thumbnail.png",
+    url: "/og-image.png",
     width: 1200,
     height: 630,
-    alt: "dminhvu"
+    alt: "QR N - QR Code Generator"
   }
 ];
 let twitterid = '@nishaaanth2';
 let sitename = 'qrGPT.io';
 let twitterimage= [
   {
-    url: "https://dminhvu.com/images/home/thumbnail.png",
+    url: "/og-image.png",
     width: 1200,
     height: 630,
-    alt: "dminhvu"
+    alt: "QR N - QR Code Generator"
   }
 ]
 
@@ -48,6 +48,15 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: '/favicon.ico',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
   },
   openGraph: {
     images: ogimage,
@@ -77,9 +86,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <head>
         <PlausibleProvider domain="qrgpt.io" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: title,
+              url: url,
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: `${url}/start?url={search_term_string}`,
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
       </head>
       <body className={inter.className}>
         <Navbar />

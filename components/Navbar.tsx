@@ -10,8 +10,10 @@ const Navbar = () => {
   const [state, setState] = useState(false);
 
   const navigation = [
-    // { title: 'Testimonials', path: '#testimonials' },
     { title: 'Homepage', path: '/' },
+    { title: 'Features', path: '/#features' },
+    { title: 'Testimonials', path: '/#testimonials' },
+    { title: 'Open Source', path: '/#oss' },
   ];
 
   const pathname = usePathname();
@@ -93,7 +95,14 @@ const Navbar = () => {
               {navigation.map((item, idx) => {
                 return (
                   <li key={idx} className="duration-150 hover:text-gray-900">
-                    <Link href={item.path} className="block">
+                    <Link
+                      href={item.path}
+                      className="block"
+                      onClick={() => {
+                        setState(false);
+                        document.body.classList.remove('overflow-hidden');
+                      }}
+                    >
                       {item.title}
                     </Link>
                   </li>

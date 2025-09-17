@@ -94,6 +94,10 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 
 
 

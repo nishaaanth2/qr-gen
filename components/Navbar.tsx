@@ -12,7 +12,6 @@ const Navbar = () => {
   const navigation = [
     { title: 'Homepage', path: '/' },
     { title: 'Features', path: '/#features' },
-    { title: 'Testimonials', path: '/#testimonials' },
     { title: 'Open Source', path: '/#oss' },
   ];
 

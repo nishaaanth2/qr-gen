@@ -1,10 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import NavLink from './NavLink';
 import { motion } from 'framer-motion';
 
-let heroImages = ['/1.png', '/6.png', '/3.png', '/4.png', '/5.png', '/2.png'];
+ 
 
 export default function Hero() {
   return (
@@ -49,34 +48,7 @@ export default function Hero() {
               Discover the Difference
             </NavLink>
           </motion.div>
-          <motion.div
-            className="grid sm:grid-cols-3 grid-cols-2 gap-4 pt-10"
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={{
-              hidden: {},
-              show: {
-                transition: { staggerChildren: 0.1 },
-              },
-            }}
-          >
-            {heroImages.map((image, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 24 }}
-                variants={{ show: { opacity: 1, y: 0, transition: { duration: 0.5 } } }}
-              >
-                <Image
-                  alt="Direct QR Code Example"
-                  src={image}
-                  width={500}
-                  height={500}
-                  className="rounded-lg"
-                />
-              </motion.div>
-            ))}
-          </motion.div>
+          
         </div>
       </div>
     </section>

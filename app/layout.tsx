@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import Footer from '@/components/Footer';
 import { Analytics } from '@vercel/analytics/react';
 import PlausibleProvider from 'next-plausible';
+import ServiceWorker from '@/components/ServiceWorker';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -47,7 +48,21 @@ export const metadata: Metadata = {
     'qr code creator',
   ],
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icons/manifest-icon-192.maskable.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/manifest-icon-512.maskable.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-icon-180.png', sizes: '180x180' },
+    ],
+  },
+  themeColor: '#0b1020',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title,
   },
   robots: {
     index: true,
@@ -111,6 +126,7 @@ export default function RootLayout({
         <main>{children}</main>
         <Analytics />
         <Footer />
+        <ServiceWorker />
       </body>
     </html>
   );

@@ -20,7 +20,7 @@ const features: FeatureItem[] = [
   {
     title: 'Fast & Reliable',
     description:
-      'Client-side generation delivers instant results with rock-solid scannability.',
+      'Client-side generation delivers instant results with rock-solid scannability. It\'s a verified QR.',
     Icon: Zap,
   },
   {
